@@ -35,15 +35,24 @@ func downloadAndPlay(dir string, name string, u string, done chan bool) {
 }
 
 func play(fileName string, done chan bool) {
+	defer func() {
+		recover()
+	}()
 	f, err := os.Open(fileName)
 	if err != nil {
 		fmt.Printf("failed to read mp3: %v\n", err)
+		return
 	}
 
 	streamer, format, err := mp3.Decode(f)
 	if err != nil {
 		fmt.Printf("failed to decode mp3: %v\n", err)
+		f.Close()
+		os.Remove(fileName)
+		return
+
 	}
+	defer f.Close()
 	defer streamer.Close()
 
 	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
@@ -52,6 +61,9 @@ func play(fileName string, done chan bool) {
 	speaker.Play(beep.Seq(streamer, beep.Callback(func() {
 		selfDone <- true
 	})))
+
 	<-selfDone
+	time.Sleep(200 * time.Millisecond)
+
 	done <- true
 }

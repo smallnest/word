@@ -53,9 +53,11 @@ func main() {
 	fmt.Println(def)
 
 	if !mp3Exist {
-		downloadAndPlay(d+"/.words", word, mp3, done)
+		go downloadAndPlay(d+"/.words", word, mp3, done)
 	}
 
-	<-done
-	time.Sleep(200 * time.Millisecond)
+	select {
+	case <-done:
+	case <-time.After(3 * time.Second):
+	}
 }
