@@ -13,12 +13,8 @@ import (
 	"github.com/faiface/beep/speaker"
 )
 
-func downloadAndPlay(dir string, name string, u string) {
+func downloadAndPlay(dir string, name string, u string, done chan bool) {
 	fileName := filepath.Join(dir, name+".mp3")
-	if _, err := os.Stat(filepath.Join(dir, name+".mp3")); !os.IsNotExist(err) {
-		play(fileName)
-		return
-	}
 
 	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
 	if err != nil {
@@ -35,10 +31,10 @@ func downloadAndPlay(dir string, name string, u string) {
 	resp.Body.Close()
 	f.Close()
 
-	play(fileName)
+	play(fileName, done)
 }
 
-func play(fileName string) {
+func play(fileName string, done chan bool) {
 	f, err := os.Open(fileName)
 	if err != nil {
 		fmt.Printf("failed to read mp3: %v\n", err)
@@ -51,11 +47,11 @@ func play(fileName string) {
 	defer streamer.Close()
 
 	speaker.Init(format.SampleRate, format.SampleRate.N(time.Second/10))
-	done := make(chan bool)
-	speaker.Play(beep.Seq(streamer, beep.Callback(func() {
-		done <- true
-	})))
 
-	<-done
-	time.Sleep(200 * time.Millisecond)
+	selfDone := make(chan bool)
+	speaker.Play(beep.Seq(streamer, beep.Callback(func() {
+		selfDone <- true
+	})))
+	<-selfDone
+	done <- true
 }
