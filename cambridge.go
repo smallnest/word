@@ -31,7 +31,7 @@ func (e cambridge) audio(word string, us bool) (mp3, ipa, def string, err error)
 	if us {
 		val, ok := doc.Find(".us span.audio_play_button").Attr("data-src-mp3")
 		if !ok {
-			fmt.Println("failed to get audio")
+			fmt.Printf("failed to get audio for %s\n", word)
 			return mp3, ipa, def, errors.New("not found")
 		}
 
@@ -53,11 +53,6 @@ func (e cambridge) audio(word string, us bool) (mp3, ipa, def string, err error)
 	doc.Find("span.def-body > span.trans").Each(func(_ int, s *goquery.Selection) {
 		def = def + strings.Trim(s.Text(), " ") + "\n"
 	})
-
-	// .Children().Each(func(_ int, s *goquery.Selection) {
-
-	// 	def = def + s.Text() + "\n"
-	// })
 
 	return mp3, ipa, def, nil
 }

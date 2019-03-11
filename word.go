@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 )
 
@@ -51,9 +52,13 @@ func list() {
 
 	scanner := bufio.NewScanner(f)
 
+	d := color.New(color.FgHiGreen, color.Bold)
 	for scanner.Scan() {
 		word := scanner.Text()
+		fmt.Println()
+		d.Println(word)
 		playWord(word)
+		time.Sleep(2 * time.Second)
 	}
 }
 
