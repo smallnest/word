@@ -54,5 +54,6 @@ func (e cambridge) audio(word string, us bool) (mp3, ipa, def string, err error)
 		def = def + strings.Trim(s.Text(), " ") + "\n"
 	})
 
+	ipa = "[" + ipa + "]"
 	return mp3, ipa, def, nil
 }
