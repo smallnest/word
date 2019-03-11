@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -76,9 +77,9 @@ func playWord(word string) {
 	} else {
 		path = d + "/.words/uk"
 	}
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.MkdirAll(path, 0777)
-	}
+
+	ensureDir(path)
+	ensureDir(d + "/.words/def")
 
 	// first check whether mp3 exists？
 	done := make(chan bool)
@@ -86,6 +87,18 @@ func playWord(word string) {
 	if _, err := os.Stat(path + "/" + word + ".mp3"); !os.IsNotExist(err) {
 		go play(path+"/"+word+".mp3", done)
 		mp3Exist = true
+	}
+
+	if _, err := os.Stat(d + "/.words/def/" + word + ".txt"); !os.IsNotExist(err) {
+		f, _ := os.Open(d + "/.words/def/" + word + ".txt")
+		ipaDef, _ := ioutil.ReadAll(f)
+		fmt.Println(string(ipaDef))
+
+		select {
+		case <-done:
+		case <-time.After(3 * time.Second):
+		}
+		return
 	}
 
 	mp3, ipa, def, err := engine.audio(word, us)
@@ -101,8 +114,21 @@ func playWord(word string) {
 		go downloadAndPlay(path, word, mp3, done)
 	}
 
+	// save ipa and def
+	f, _ := os.OpenFile(d+"/.words/def/"+word+".txt", os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
+	f.WriteString(ipa)
+	f.WriteString("\r\n")
+	f.WriteString(def)
+	f.Close()
+
 	select {
 	case <-done:
 	case <-time.After(3 * time.Second):
+	}
+}
+
+func ensureDir(dir string) {
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, 0777)
 	}
 }
