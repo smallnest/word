@@ -5,7 +5,7 @@ alias
 app
 archive
 array
-avata
+avatar
 bandwidth
 bind
 cache

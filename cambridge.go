@@ -4,11 +4,12 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/PuerkitoBio/goquery"
 )
 
-var cambridgeURL = "https://dictionary.cambridge.org/dictionary/english/"
+var cambridgeURL = "https://dictionary.cambridge.org/dictionary/english-chinese-simplified/"
 
 type cambridge struct{}
 
@@ -49,7 +50,14 @@ func (e cambridge) audio(word string, us bool) (mp3, ipa, def string, err error)
 		ipa = doc.Find(".uk .pron span.ipa").First().Text()
 	}
 
-	def = doc.Find("p.def-head b.def").Text()
+	doc.Find("span.def-body > span.trans").Each(func(_ int, s *goquery.Selection) {
+		def = def + strings.Trim(s.Text(), " ") + "\n"
+	})
+
+	// .Children().Each(func(_ int, s *goquery.Selection) {
+
+	// 	def = def + s.Text() + "\n"
+	// })
 
 	return mp3, ipa, def, nil
 }
