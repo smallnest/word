@@ -16,7 +16,7 @@ import (
 func downloadAndPlay(dir string, name string, u string, done chan bool) {
 	fileName := filepath.Join(dir, name+".mp3")
 
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0644)
+	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0777)
 	if err != nil {
 		fmt.Printf("failed to create file %s: %v\n", fileName, err)
 		return

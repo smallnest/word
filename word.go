@@ -77,7 +77,7 @@ func playWord(word string) {
 		path = d + "/.words/uk"
 	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.MkdirAll(path, 0644)
+		os.MkdirAll(path, 0777)
 	}
 
 	// first check whether mp3 exists？
